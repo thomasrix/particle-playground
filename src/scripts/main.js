@@ -1,17 +1,11 @@
 require('../styles/styles.scss');
 
 
-import Example from './components/example/example-component';
-
-
-
-
+import CanvasBalls from './canvasballs';
 
 function init() {
 
-
-    const ex = new Example();
-
+    const cb = new CanvasBalls();
 
 }
 document.addEventListener('DOMContentLoaded', () => {
