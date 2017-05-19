@@ -1,5 +1,6 @@
 'use strict'
 import Particle from '../particle/particle';
+import Vector from '../../utils/vector';
 import {normalize, linearInterpolate} from '../../utils/trix-utils'
 
 export default class Ball extends Particle{
@@ -8,6 +9,8 @@ export default class Ball extends Particle{
 		this.radius = radius;
 		this.drag = 1 - (this.radius / 10000);
 		this.resistance = linearInterpolate(normalize(this.radius, 1, 20), .80, .99);
+		this.angle = new Vector(1, 0);
+		this.rotation = 0;
 		console.log('drag:', this.radius, this.resistance);
 	}
 	setResistance(value){
@@ -25,28 +28,36 @@ export default class Ball extends Particle{
 	}
 	update(){
 		super.update();
+		this.angle.setAngle(this.angle.getAngle() + this.rotation);
 	 	this.velocity.multiplyBy(this.drag);
 		// this.checkPosition()
 	}
 	checkPosition(){
 		if(this.position.getY() + this.radius >= this.bottom){
-			this.velocity.setY(this.velocity.getY()*-1);
-	 		this.velocity.multiplyBy(this.resistance);	
+			this.velocity.setY(this.velocity.getY()*-this.resistance);
+			this.rotation = this.velocity.getX() / 70;
+			// this.velocity.setY(this.velocity.getY()*-1);
+	 		//this.velocity.multiplyBy(this.resistance);	
 			this.update();
 		}
 		if(this.position.getY() - this.radius <= this.top){
-			this.velocity.setY(this.velocity.getY()*-1);
-	 		this.velocity.multiplyBy(this.resistance);	
+			this.velocity.setY(this.velocity.getY()*-this.resistance);
+			// this.velocity.setY(this.velocity.getY()*-1);
+	 		// this.velocity.multiplyBy(this.resistance);	
 			this.update();
 		}
 		if(this.position.getX() + this.radius >= this.right){
-			this.velocity.setX(this.velocity.getX()*-1);
-	 		this.velocity.multiplyBy(this.resistance);	
+			this.velocity.setX(this.velocity.getX()*-this.resistance);
+			this.rotation = -this.velocity.getY() / 70;
+			// this.velocity.setX(this.velocity.getX()*-1);
+	 		// this.velocity.multiplyBy(this.resistance);	
 			this.update();
 		}
 		if(this.position.getX() - this.radius <= this.left){
-			this.velocity.setX(this.velocity.getX()*-1);
-	 		this.velocity.multiplyBy(this.resistance);	
+			this.velocity.setX(this.velocity.getX()*-this.resistance);
+			this.rotation = this.velocity.getX() / 70;
+			// this.velocity.setX(this.velocity.getX()*-1);
+	 		// this.velocity.multiplyBy(this.resistance);	
 			this.update();
 		}
 
