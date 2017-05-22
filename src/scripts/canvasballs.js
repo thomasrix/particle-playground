@@ -30,13 +30,13 @@ export default class CanvasBalls{
 		let x = (mousePos.x - canvasPos.left) / canvasRatio,
 		y = (mousePos.y - canvasPos.top) / canvasRatio;
 
-		for(let b = 0 ; b < 5 ; b++){
+		for(let b = 0 ; b < 20 ; b++){
 			let speed = Math.random() * 5 + 1,
 			direction = Math.random() * Math.PI * 2,
-			gravity = 0.08,
-			radius = parseInt(Math.random() * 20) + 1;
+			gravity = 0.2,
+			radius = parseInt(Math.random() * 30) + 10;
 			let ball = new Ball(x, y, speed, direction, gravity, radius);
-			ball.setColor(parseInt(Math.random() * 180 + 40), parseInt(Math.random()*60 + 40));
+			ball.setColor(parseInt(Math.random() * 240 + 0), parseInt(Math.random()*60 + 40));
 
 			ball.setBoundaries(0, 0, 1000, 800);
 			this.balls.push(ball);
@@ -65,12 +65,14 @@ export default class CanvasBalls{
 	}
 	update(){
 		// console.log('update');
-		this.ctx.fillStyle='rgba(0, 0, 0, 0.7)';
+		this.ctx.fillStyle='rgba(0, 0, 0, 0.6)';
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		for(let i = 0, l = this.balls.length ; i < l ; i++){
 			let ball = this.balls[i];
-			ball.update();
-			ball.checkPosition();
+			if(ball.alive){
+				ball.update();
+				ball.checkPosition();
+			}
 		 	this.drawImageBall(ball);
 			this.drawColorBall(ball);
 		}

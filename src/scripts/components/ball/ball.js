@@ -6,9 +6,10 @@ import {normalize, linearInterpolate} from '../../utils/trix-utils'
 export default class Ball extends Particle{
 	constructor(x, y, speed, direction, gravity = 0, radius = 10){
 		super(x, y, speed, direction, gravity);
+		this.alive = true;
 		this.radius = radius;
-		this.drag = 1 - (this.radius / 10000);
-		this.resistance = linearInterpolate(normalize(this.radius, 1, 20), .80, .99);
+		this.drag = 1 - (this.radius / 20000);
+		this.resistance = linearInterpolate(normalize(this.radius, 10, 30), .85, .75);
 		this.angle = new Vector(1, 0);
 		this.rotation = 0;
 		console.log('drag:', this.radius, this.resistance);
@@ -27,37 +28,47 @@ export default class Ball extends Particle{
 		this.bottom = bottom;
 	}
 	update(){
-		super.update();
-		this.angle.setAngle(this.angle.getAngle() + this.rotation);
-	 	this.velocity.multiplyBy(this.drag);
-		// this.checkPosition()
+		if(this.alive){
+			super.update();
+			this.angle.setAngle(this.angle.getAngle() + this.rotation);
+		 	this.velocity.multiplyBy(this.drag);
+			// this.checkPosition();
+	 	}	 		
 	}
 	checkPosition(){
 		if(this.position.getY() + this.radius >= this.bottom){
-			this.velocity.setY(this.velocity.getY()*-this.resistance);
+			this.position = this.savedPosition;
+			// this.velocity.setY(this.velocity.getY()*-this.resistance);
+			this.velocity.setY(this.velocity.getY()*-1);
 			this.rotation = this.velocity.getX() / 70;
-			// this.velocity.setY(this.velocity.getY()*-1);
-	 		//this.velocity.multiplyBy(this.resistance);	
+	 		this.velocity.multiplyBy(this.resistance);
+	 		//super.update()	
 			this.update();
+			// console.log(this.velocity.getLength(), this.alive);
+		 	if(this.velocity.getLength() < 0.75) this.alive = false;
+
 		}
 		if(this.position.getY() - this.radius <= this.top){
-			this.velocity.setY(this.velocity.getY()*-this.resistance);
-			// this.velocity.setY(this.velocity.getY()*-1);
-	 		// this.velocity.multiplyBy(this.resistance);	
+			// this.velocity.setY(this.velocity.getY()*-this.resistance);
+			this.position = this.savedPosition;
+			this.velocity.setY(this.velocity.getY()*-1);
+	 		this.velocity.multiplyBy(this.resistance);	
 			this.update();
 		}
 		if(this.position.getX() + this.radius >= this.right){
-			this.velocity.setX(this.velocity.getX()*-this.resistance);
+			// this.velocity.setX(this.velocity.getX()*-this.resistance);
+			this.position = this.savedPosition;
+			this.velocity.setX(this.velocity.getX()*-1);
 			this.rotation = -this.velocity.getY() / 70;
-			// this.velocity.setX(this.velocity.getX()*-1);
-	 		// this.velocity.multiplyBy(this.resistance);	
+	 		this.velocity.multiplyBy(this.resistance);	
 			this.update();
 		}
 		if(this.position.getX() - this.radius <= this.left){
-			this.velocity.setX(this.velocity.getX()*-this.resistance);
+			// this.velocity.setX(this.velocity.getX()*-this.resistance);
+			this.position = this.savedPosition;
+			this.velocity.setX(this.velocity.getX()*-1);
 			this.rotation = this.velocity.getX() / 70;
-			// this.velocity.setX(this.velocity.getX()*-1);
-	 		// this.velocity.multiplyBy(this.resistance);	
+	 		this.velocity.multiplyBy(this.resistance);	
 			this.update();
 		}
 
