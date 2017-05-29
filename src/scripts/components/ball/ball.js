@@ -9,7 +9,7 @@ export default class Ball extends Particle{
 		this.alive = true;
 		this.radius = radius;
 		this.drag = 1 - (this.radius / 20000);
-		this.resistance = linearInterpolate(normalize(this.radius, 10, 30), .85, .75);
+		this.resistance = linearInterpolate(normalize(this.radius, 10, 30), .80, .75);
 		this.angle = new Vector(1, 0);
 		this.rotation = 0;
 		console.log('drag:', this.radius, this.resistance);
