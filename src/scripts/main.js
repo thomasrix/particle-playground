@@ -6,8 +6,8 @@ import Sparks from './sparks';
 
 function init() {
 
-    // const cb = new CanvasBalls();
-    const sp = new Sparks();
+     const cb = new CanvasBalls();
+    // const sp = new Sparks();
 
 }
 document.addEventListener('DOMContentLoaded', () => {

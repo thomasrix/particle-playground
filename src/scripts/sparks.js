@@ -15,6 +15,7 @@ export default class Sparks{
 		canvas.height = parent.innerHeight-40;
 
 		this.ctx = canvas.getContext('2d');
+
 		this.canvas = canvas;
 		this.sparks = [];
 
@@ -66,10 +67,13 @@ export default class Sparks{
 		lightness = 80;
 
 		this.ctx.fillStyle='hsla('+ball.hue+', 100%, '+ball.lightness+'%, 0.8)';
+		 //this.ctx.shadowBlur = 30;
+		 //this.ctx.shadowColor = '#FFFFFF';
 
 		this.ctx.beginPath();
 		this.ctx.arc(ball.position.getX(), ball.position.getY(), ball.radius, 0, Math.PI *2);
 		this.ctx.fill();
+		//this.ctx.shadowBlur = 0;
 
 	}
 	update(){
