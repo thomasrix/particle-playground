@@ -12,7 +12,7 @@ export default class Ball extends Particle{
 		this.resistance = linearInterpolate(normalize(this.radius, 10, 30), .80, .75);
 		this.angle = new Vector(1, 0);
 		this.rotation = 0;
-		console.log('drag:', this.radius, this.resistance);
+		//console.log('drag:', this.radius, this.resistance);
 	}
 	setResistance(value){
 		this.resistance = value;
@@ -35,6 +35,15 @@ export default class Ball extends Particle{
 			// this.checkPosition();
 	 	}	 		
 	}
+	kick(dx, dy){
+		console.log('kick', dx, dy)
+		this.velocity.setY(this.velocity.getY()*-1+dy);
+		this.velocity.setX(this.velocity.getX()+dx);
+		this.rotation = dx / 200;
+	}
+	setCallback(parent){
+		this.parent = parent;
+	}
 	checkPosition(){
 		if(this.position.getY() + this.radius >= this.bottom){
 			this.position = this.savedPosition;
@@ -42,10 +51,13 @@ export default class Ball extends Particle{
 			this.velocity.setY(this.velocity.getY()*-1);
 			this.rotation = this.velocity.getX() / 70;
 	 		this.velocity.multiplyBy(this.resistance);
-	 		//super.update()	
+			 //super.update()
+			this.parent.looseLife();	
 			this.update();
+			//this.alive = false;
 			// console.log(this.velocity.getLength(), this.alive);
-		 	if(this.velocity.getLength() < 0.75) this.alive = false;
+			 
+			//if(this.velocity.getLength() < 0.75) this.alive = false;
 
 		}
 		if(this.position.getY() - this.radius <= this.top){

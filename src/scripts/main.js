@@ -2,11 +2,13 @@ require('../styles/styles.scss');
 
 
 import CanvasBalls from './canvasballs';
+import KeepyUppy from './keepy-uppy';
 import Sparks from './sparks';
 
 function init() {
 
-     const cb = new CanvasBalls();
+     const ku = new KeepyUppy();
+    //  const cb = new CanvasBalls();
     // const sp = new Sparks();
 
 }

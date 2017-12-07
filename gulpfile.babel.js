@@ -1,50 +1,29 @@
 import gulp from 'gulp';
 import babel from 'gulp-babel';
 import gutil from 'gulp-util';
-import removeLog from 'gulp-remove-logging';
+// import removeLog from 'gulp-remove-logging';
+import stripDebug from 'gulp-strip-debug';
 import inject from 'gulp-inject';
+import prompt from 'gulp-prompt';
 import webpack from 'webpack';
 import webpackConfig from './webpack.config.babel';
-import webpackTestConfig from './webpack.test.config.babel';
+import webpackDevConfig from './webpack.dev.config.babel';
 import WebpackDevServer from 'webpack-dev-server';
 
-gulp.task('default', ['watch:images:dev','webpack-dev-server'], () => {
+gulp.task('default', ['watch'], () => {
 
 });
 
-gulp.task('serve', ['webpack-dev-server'], () => {
-
-});
-
-gulp.task('build', ['index:dist'], () => {
-
-});
-
-gulp.task('stage', ['build'], () => {
+gulp.task('stage', ['assets:dev', 'index:dev'], () => {
 
   const pathArray = __dirname.split('/');
   const folder = pathArray[pathArray.length -1];
 
-  return gulp.src('dist/**/*')
+  return gulp.src('dev/**/*')
   .pipe(gulp.dest('/Volumes/staging/' + folder + ''));
 
 })
-
-gulp.task('images:dev', () => {
-  gulp.src('src/images/*')
-  .pipe(gulp.dest('temp/images'))
-})
-
-gulp.task('images:dist', () => {
-  gulp.src('src/images/*')
-  .pipe(gulp.dest('dist/images'))
-})
-
-gulp.task('watch:images:dev', () => {
-    return gulp.watch(['src/images/**'], ['images:dev']);
-});
-
-gulp.task('deploy', ['build'], () => {
+gulp.task('deploy', ['assets:dist', 'index:dist'], () => {
 
   const pathArray = __dirname.split('/');
   const folder = pathArray[pathArray.length -1];
@@ -60,26 +39,22 @@ gulp.task('deploy', ['build'], () => {
 
 })
 
+// DEV: ------------------------------------------------------
+
+gulp.task('assets:dev', () => {
+  gulp.src('src/assets/**/*')
+  .pipe(gulp.dest('dev/assets'))
+})
 
 gulp.task('index:dev', ['webpack:dev'], function () {
   var target = gulp.src('src/index.html');
-  var sources = gulp.src(['**/*.js'], {read: false, cwd: __dirname + '/temp'});
-  return target.pipe(inject(sources))
-    .pipe(gulp.dest('temp'));
-});
-
-
-gulp.task('babel:dev', () => {
-    gulp.src('src/*.scss')
-        .pipe(gulp.dest('temp'));
-
-    return gulp.src('src/*.js')
-        .pipe(babel())
-        .pipe(gulp.dest('temp'));
+  var sources = gulp.src(['**/*.js'], {read: false, cwd: __dirname + '/dev'});
+  return target.pipe(inject(sources, {addRootSlash:false}))
+    .pipe(gulp.dest('dev'));
 });
 
 gulp.task('webpack:dev', ['babel:dev'], (callback) =>{
-    const myConfig = Object.create(webpackTestConfig);
+    const myConfig = Object.create(webpackDevConfig);
 
     webpack(myConfig, (err, stats)=>{
         if(err) throw new gutil.PluginError('webpack', err);
@@ -92,28 +67,35 @@ gulp.task('webpack:dev', ['babel:dev'], (callback) =>{
     })
 });
 
+gulp.task('babel:dev', () => {
+    gulp.src('src/**/*.scss')
+        .pipe(gulp.dest('temp'));
+
+    return gulp.src('src/**/*.js')
+        .pipe(babel())
+        .pipe(gulp.dest('temp'));
+});
+
+// DIST: ------------------------------------------------------
+
+gulp.task('assets:dist', () => {
+  gulp.src('src/assets/**/*')
+  .pipe(gulp.dest('dist/assets'))
+
+})
+
 gulp.task('index:dist', ['webpack:dist'], function () {
   var target = gulp.src('src/index.html');
   var sources = gulp.src(['**/*.js'], {read: false, cwd: __dirname + '/dist'});
-  return target.pipe(inject(sources))
+  return target.pipe(inject(sources, {addRootSlash:false}))
     .pipe(gulp.dest('dist'));
-});
-
-gulp.task('babel:dist', () => {
-    gulp.src('src/*.scss')
-        .pipe(gulp.dest('dist'));
-
-    return gulp.src('src/*.js')
-        .pipe(babel())
-        .pipe(removeLog())
-        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('webpack:dist', ['babel:dist'], (callback) =>{
     const myConfig = Object.create(webpackConfig);
     myConfig.plugins = [
         // new webpack.optimize.DedupePlugin(),
-        //new webpack.optimize.UglifyJsPlugin()
+        new webpack.optimize.UglifyJsPlugin()
     ];
 
     return webpack(myConfig, (err, stats)=>{
@@ -126,9 +108,21 @@ gulp.task('webpack:dist', ['babel:dist'], (callback) =>{
     })
 });
 
+gulp.task('babel:dist', () => {
+    gulp.src('src/**/*.scss')
+        .pipe(gulp.dest('temp'));
+
+    return gulp.src('src/**/*.js')
+        .pipe(babel())
+        .pipe(stripDebug())
+        .pipe(gulp.dest('temp'));
+});
+
+// WATCH: ------------------------------------------------------
+
 gulp.task('webpack-dev-server', ['index:dev'], function(callback) {
 
-    const myConfig = Object.create(webpackTestConfig);
+    const myConfig = Object.create(webpackDevConfig);
 
     // Start a webpack-dev-server
     new WebpackDevServer(webpack(myConfig), {
@@ -136,7 +130,7 @@ gulp.task('webpack-dev-server', ['index:dev'], function(callback) {
         stats: {
             colors: true
         },
-        contentBase: 'temp/'
+        contentBase: 'dev/'
     }).listen(8080, 'localhost', function(err) {
         if(err) throw new gutil.PluginError('webpack-dev-server', err);
         gutil.log('[webpack-dev-server]', 'http://localhost:8080/webpack-dev-server/index.html');
@@ -145,5 +139,7 @@ gulp.task('webpack-dev-server', ['index:dev'], function(callback) {
 });
 
 gulp.task('watch', () => {
+    gulp.start('webpack-dev-server');
+    gulp.watch(['src/assets/**'], ['assets:dev']);
     return gulp.watch(['src/**'], ['webpack-dev-server']);
 });
